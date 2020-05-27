@@ -598,7 +598,7 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
    out.setf(std::ios::right, std::ios::adjustfield);
    out << std::setw(3) << "Rank" << ' ';
    out.setf(std::ios::left, std::ios::adjustfield);
-   out << std::setw(Width) << "Name" << ' ';
+   out << std::setw(Width) << "Name" << ':' << ' ';
    out.setf(std::ios::right, std::ios::adjustfield);
    out << std::setw(5) << "Elo" << ' ';
    out << std::setw(4) << "  +" << ' ';
@@ -625,7 +625,7 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
      else
       out << std::setw(4) << Counter << ' ';
      out.setf(std::ios::left, std::ios::adjustfield);
-     out << std::setw(Width) << vecName[j] << ' ';
+     out << std::setw(Width) << vecName[j] << ':' << ' ';
      out.setf(std::ios::right, std::ios::adjustfield);
      out << std::setw(5) << RoundDouble(EloScale * bt.GetElo(j) + eloOffset) << ' ';
      out << std::setw(4) << RoundDouble(EloScale * veloUpper[j]) << ' ';
