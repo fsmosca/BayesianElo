@@ -62,6 +62,7 @@ const char * const CResultSetCUI::tszCommands[] =
  "gen",
  "connect",
  "elo",
+ "addwld",
  0
 };
 
@@ -102,7 +103,8 @@ int CResultSetCUI::ProcessCommand(const char *pszCommand,
   IDC_ReadPGN,
   IDC_Gen,
   IDC_Connect,
-  IDC_Elo
+  IDC_Elo,
+  IDC_AddWLD,
  };
 
  switch (ArrayLookup(pszCommand, tszCommands))
@@ -128,6 +130,7 @@ int CResultSetCUI::ProcessCommand(const char *pszCommand,
    out << "connect [p] [fr]  remove players not connected to p [fr=forbidden result]\n";
    out << '\n';
    out << "elo ............. open Elo-estimation interface\n";
+   out << "addwld a b nw nl nd .. add WLD results between players a and b (from the point of view of a)\n";
    out << '\n';
   break;
 
@@ -346,6 +349,85 @@ int CResultSetCUI::ProcessCommand(const char *pszCommand,
    ercui.MainLoop(in, out);
   }
   break;
+
+  case IDC_AddWLD:
+	{
+		int i;
+		unsigned White = 0;
+		unsigned Black = 0;
+		unsigned nwins = 0;
+		unsigned nlosses = 0;
+		unsigned ndraws = 0;
+		std::istringstream(pszParameters) >> White >> Black >> nwins >> nlosses >> ndraws;
+		if (White < vecName.size() && Black < vecName.size()) 
+    {
+      // First player wins
+      // If number of wins is even we split it to two, for white and black sides.
+      if (nwins%2 == 0)
+      {
+        for (i = 0; i < int(nwins/2); ++i)
+        {
+          rs.Append(White, Black, 2); 	/* first player wins as white. */
+          rs.Append(Black, White, 0); 	/* first player wins as black. */
+        }
+      }
+      else
+      {
+        nwins -= 1;
+        for (i = 0; i < int(nwins/2); ++i)
+        {
+          rs.Append(White, Black, 2); 	/* first player wins as white. */
+          rs.Append(Black, White, 0); 	/* first player wins as black. */
+        }
+        rs.Append(White, Black, 2); 	/* first player wins as white. */
+      }
+
+      // First player loses
+      // If number of loses is even we split it to two, for white and black sides.
+      if (nlosses%2 == 0)
+      {
+        for (i = 0; i < int(nlosses/2); ++i)
+        {
+          rs.Append(Black, White, 2);		/* second player wins as white. */
+          rs.Append(White, Black, 0);		/* second player wins as black. */
+        }
+      }
+      else 
+      {
+        nlosses -= 1;
+        for (i = 0; i < int(nlosses/2); ++i)
+        {
+          rs.Append(Black, White, 2);		/* second player wins as white. */
+          rs.Append(White, Black, 0);		/* second player wins as black. */
+        }
+        rs.Append(Black, White, 2);		/* second player wins as white. */
+      }
+
+      // Draws
+      // If number of draws is even we split it to two, for white and black sides.
+      if (ndraws%2 == 0)
+      {
+        for (i = 0; i < int(ndraws/2); ++i)
+        {
+          rs.Append(White, Black, 1);		/* first player draws as white. */
+          rs.Append(Black, White, 1);		/* second player draws as white. */
+        }
+      }
+      else
+      {
+        ndraws -= 1;
+        for (i = 0; i < int(ndraws/2); ++i)
+        {
+          rs.Append(White, Black, 1);		/* first player draws as white. */
+          rs.Append(Black, White, 1);		/* second player draws as white. */
+        }
+        rs.Append(White, Black, 1);		/* first player draws as white. */
+      }
+    }
+    else
+     	out << "Error: no such player\n";
+	}
+	break;
 
   default: /////////////////////////////////////////////////////////////////
    return CConsoleUI::ProcessCommand(pszCommand, pszParameters, in, out);
