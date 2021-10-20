@@ -16,6 +16,7 @@
 const char CVersion::szVersion[] = VERSION;
 const char CVersion::szCopyright[] = 
 "version "VERSION", Copyright (C) 1997-2010 Remi Coulom.\n"
+"version 1.0, fsmosca\n"
 "compiled "__DATE__" "__TIME__".\n"
 "This program comes with ABSOLUTELY NO WARRANTY.\n"
 "This is free software, and you are welcome to redistribute it\n"
