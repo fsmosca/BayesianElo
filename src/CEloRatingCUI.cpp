@@ -607,6 +607,9 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
    out << std::setw(5) << "score" << ' ';
    out << std::setw(5) << "oppo." << ' ';
    out << std::setw(5) << "draws" << ' ';
+   out << std::setw(5) << "win" << ' ';
+   out << std::setw(5) << "loss" << ' ';
+   out << std::setw(5) << "draw" << ' ';
    out << '\n';
 
    const double *pElo = bt.GetElo();
@@ -619,6 +622,9 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
     {
      Counter++;
      double Score = double(crsNoPrior.Score(j)) / 2;
+     float Draws = crsNoPrior.CountDraws(j);
+     float Loses = Games - Score - Draws/2;
+     float Wins = Games - Loses - Draws;
      out.setf(std::ios::right, std::ios::adjustfield);
      if (fFullRank)
       out << std::setw(4) << i + 1 << ' ';
@@ -634,8 +640,10 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
      out << std::setw(4) << RoundDouble(100 * Score / Games) << "% ";
      out << std::setw(5) <<
       RoundDouble(EloScale * crs.AverageOpponent(j, pElo) + eloOffset) << ' ';
-     out << std::setw(4) << RoundDouble(100 * crsNoPrior.CountDraws(j) /
-                                        double(Games)) << "% ";
+     out << std::setw(4) << RoundDouble(100 * Draws / double(Games)) << "% ";
+     out << std::setw(5) <<  Wins << ' ';
+     out << std::setw(5) <<  Loses << ' ';
+     out << std::setw(5) <<  Draws << ' ';
      out << '\n';
     }
    }
