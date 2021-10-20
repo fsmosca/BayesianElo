@@ -1,1 +1,6 @@
 src/bayeselo
+src/bayeselo.exe
+src/*.txt
+src/*.pgn
+src/*.bat
+src/*.zip
