@@ -603,10 +603,10 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
    out << std::setw(5) << "Elo" << ' ';
    out << std::setw(4) << "  +" << ' ';
    out << std::setw(4) << "  -" << ' ';
-   out << std::setw(5) << "games" << ' ';
-   out << std::setw(5) << "score" << ' ';
+   out << std::setw(6) << "games" << ' ';
+   out << std::setw(6) << "score" << ' ';
    out << std::setw(5) << "oppo." << ' ';
-   out << std::setw(5) << "draws" << ' ';
+   out << std::setw(6) << "draws" << ' ';
    out << std::setw(5) << "win" << ' ';
    out << std::setw(5) << "loss" << ' ';
    out << std::setw(5) << "draw" << ' ';
@@ -636,14 +636,18 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
      out << std::setw(5) << RoundDouble(EloScale * bt.GetElo(j) + eloOffset) << ' ';
      out << std::setw(4) << RoundDouble(EloScale * veloUpper[j]) << ' ';
      out << std::setw(4) << RoundDouble(EloScale * veloLower[j]) << ' ';
-     out << std::setw(5) << Games << ' ';
-     out << std::setw(4) << RoundDouble(100 * Score / Games) << "% ";
+     out << std::setw(6) << RoundDouble(Games) << ' ';
+
+     out.setf(std::ios::fixed, std::ios::floatfield);
+     out.setf(std::ios::showpoint);
+     out << std::setw(5) << std::setprecision(1) << (100 * Score / Games) << "% ";
+
      out << std::setw(5) <<
       RoundDouble(EloScale * crs.AverageOpponent(j, pElo) + eloOffset) << ' ';
-     out << std::setw(4) << RoundDouble(100 * Draws / double(Games)) << "% ";
-     out << std::setw(5) <<  Wins << ' ';
-     out << std::setw(5) <<  Loses << ' ';
-     out << std::setw(5) <<  Draws << ' ';
+     out << std::setw(5) << std::setprecision(1) << 100 * Draws / double(Games) << "% ";
+     out << std::setw(5) << RoundDouble(Wins) << ' ';
+     out << std::setw(5) << RoundDouble(Loses) << ' ';
+     out << std::setw(5) << RoundDouble(Draws) << ' ';
      out << '\n';
     }
    }
