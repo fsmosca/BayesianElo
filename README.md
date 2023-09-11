@@ -87,6 +87,10 @@ This prediction tool may also be applied to a running tournament, where some of 
 
 where partial.pgn contains the current games of the round robin. If partial.pgn does not contain all the players of the tournament yet, you may add more players with the addplayer command. In case the rating of one participant is unknown, you can set it manually with the `elo` command at the level of the prediction interface.
 
+## Applications
+
 The prediction tool also lets you change the number of points awarded for a win, a loss, and a draw. This way, it can be applied to generate predictions in the French Football Championship (soccer in the US), where a victory is 3 points, a draw 1 point and a loss 0 point. Default values are 1, 0.5, and 0.
+
+This rating system worked well from my [FIBA Live Rating Estimate Test](https://fibarating.blogspot.com/2023/09/fiba-rating-estimate.html) on the FIBA World Cup 2023 games where my home country Philippines was one of the hosts.
 
 If you want more usage information, you can get a list of available commands with the `?` command when running bayeselo.
