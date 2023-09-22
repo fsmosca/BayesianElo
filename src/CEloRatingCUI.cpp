@@ -937,7 +937,7 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
    {
     int i = vPermutation[p];
     std::string s = vecName[i].substr(0, Width - 1);
-    out << std::setw(Width) << s;
+    out << std::setw(Width) << s << ' ';
    }
    out << '\n';
    out.flush();
@@ -957,10 +957,10 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
      if (p != q)
      {
       int j = vPermutation[q];
-      out << std::setw(Width) << int(mLOS.GetElement(i, j) * Mult);
+      out << std::setw(Width) << int(mLOS.GetElement(i, j) * Mult + 0.5) << ' ';
      }
      else
-      out << std::setw(Width) << ' ';
+      out << std::setw(Width) << ' ' << ' ';
     }
     out << '\n';
    }
