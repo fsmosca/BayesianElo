@@ -606,10 +606,8 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
    out << std::setw(6) << "games" << ' ';
    out << std::setw(6) << "score" << ' ';
    out << std::setw(5) << "oppo." << ' ';
-   out << std::setw(6) << "draws" << ' ';
    out << std::setw(5) << "win" << ' ';
    out << std::setw(5) << "loss" << ' ';
-   out << std::setw(5) << "draw" << ' ';
    out << '\n';
 
    const double *pElo = bt.GetElo();
@@ -644,10 +642,8 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
 
      out << std::setw(5) <<
       RoundDouble(EloScale * crs.AverageOpponent(j, pElo) + eloOffset) << ' ';
-     out << std::setw(5) << std::setprecision(1) << 100 * Draws / double(Games) << "% ";
      out << std::setw(5) << RoundDouble(Wins) << ' ';
      out << std::setw(5) << RoundDouble(Loses) << ' ';
-     out << std::setw(5) << RoundDouble(Draws) << ' ';
      out << '\n';
     }
    }
