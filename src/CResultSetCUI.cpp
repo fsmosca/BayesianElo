@@ -141,6 +141,7 @@ int CResultSetCUI::ProcessCommand(const char *pszCommand,
   {
    CCondensedResults crs(rs);
    std::ios::fmtflags f = out.flags();
+   std::streamsize prec = out.precision();
    int PlayerWidth = ComputePlayerWidth();
 
    out.setf(std::ios::right, std::ios::adjustfield);
@@ -161,8 +162,9 @@ int CResultSetCUI::ProcessCommand(const char *pszCommand,
     out.setf(std::ios::right, std::ios::adjustfield);
     if (i < unsigned(crs.GetPlayers()))
     {
-     out << std::setw(6) << crs.CountGames(i) << ' ';
-     out << std::setw(7) << double(crs.Score(i)) / 2 << ' ';
+     out << std::setw(6) << int(crs.CountGames(i)) << ' ';
+     out.setf(std::ios::fixed, std::ios::floatfield);
+     out << std::setw(7) << std::setprecision(1) << double(crs.Score(i)) / 2 << ' ';
     }
     else
     {
@@ -173,6 +175,7 @@ int CResultSetCUI::ProcessCommand(const char *pszCommand,
    }
 
    out.flags(f);
+   out.precision(prec);
   }
   break;
 
