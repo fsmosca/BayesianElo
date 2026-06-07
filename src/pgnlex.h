@@ -20,16 +20,22 @@ class CPGNLex //pgnlex
  private: //////////////////////////////////////////////////////////////////
   std::istream *pistr;
 
+  enum {ReadBufferSize = 1 << 16};
+  char ReadBuffer[ReadBufferSize];
+  int ReadPos;
+  int ReadLen;
+
   int CurrChar;
   int Token;
   int Value;
   enum {MaxPGNLine = 1024}; 
   char szString[MaxPGNLine];
-  enum {ContextSize = 40};
+  enum {ContextSize = 64};
   char szContextBuffer[ContextSize + 1];
   int ContextIndex;
 
   int NextChar();
+  void SkipGameMoves();
 
  public: ///////////////////////////////////////////////////////////////////
   //
@@ -74,6 +80,7 @@ class CPGNLex //pgnlex
   void Reset();
   // Changes the input stream
   void Reset(std::istream &istr);  
+  void SkipGame();
 
   //
   // Functions to read tokens

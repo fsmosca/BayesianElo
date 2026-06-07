@@ -67,6 +67,8 @@ void CPGNLex::Reset()
  Value = 0;
  szString[0] = 0;
  CurrChar = '\n';
+ ReadPos = 0;
+ ReadLen = 0;
  ContextIndex = 0;
  for (int i = ContextSize + 1; --i >= 0;)
   szContextBuffer[i] = 0;
@@ -87,8 +89,20 @@ void CPGNLex::Reset(istream &istr)
 ////////////////////////////////////////////////////////////////////////////
 int CPGNLex::NextChar()
 {
- if (pistr)
-  CurrChar = pistr->get();
+ if (ReadPos >= ReadLen)
+ {
+  if (pistr)
+  {
+   pistr->read(ReadBuffer, ReadBufferSize);
+   ReadLen = int(pistr->gcount());
+  }
+  else
+   ReadLen = 0;
+  ReadPos = 0;
+ }
+
+ if (ReadPos < ReadLen)
+  CurrChar = (unsigned char)ReadBuffer[ReadPos++];
  else
   CurrChar = EOF;
 
@@ -429,4 +443,86 @@ void CPGNLex::PrintContext(std::ostream &out) const
  out << "Token : " << tszToken[Token] << '\n';
  out << "Value : " << Value << '\n';
  out << "String : " << szString << '\n';
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Skip to the start of the next game (optimized character scanning)
+////////////////////////////////////////////////////////////////////////////
+void CPGNLex::SkipGame()
+{
+ while (Token != TOK_EOF)
+ {
+  int TokenPrev = Token;
+
+  if (TokenPrev != TOK_TagOpen && TokenPrev != TOK_TagClose && TokenPrev != TOK_Symbol && TokenPrev != TOK_String)
+  {
+   SkipGameMoves();
+   return;
+  }
+
+  ReadNextToken();
+
+  if (TokenPrev == TOK_GameTermination ||
+      (TokenPrev != TOK_TagClose &&
+       TokenPrev != TOK_BOF &&
+       Token == TOK_TagOpen))
+  {
+   return;
+  }
+ }
+}
+
+void CPGNLex::SkipGameMoves()
+{
+ bool in_comment_brace = false;
+ bool in_comment_semicolon = false;
+ bool in_string = false;
+ bool escape_next = false;
+
+ int c = CurrChar; // start with the pending lookahead char, not ReadBuffer
+
+ while (c != EOF)
+ {
+  if (escape_next)
+   escape_next = false;
+  else if (c == '\\')
+   escape_next = true;
+  else if (c == '"')
+  { if (!in_comment_brace && !in_comment_semicolon) in_string = !in_string; }
+  else if (c == '{')
+  { if (!in_string && !in_comment_semicolon) in_comment_brace = true; }
+  else if (c == '}')
+  { if (in_comment_brace) in_comment_brace = false; }
+  else if (c == ';')
+  { if (!in_string && !in_comment_brace) in_comment_semicolon = true; }
+  else if (c == '\n')
+   in_comment_semicolon = false;
+  else if (c == '[' && !in_string && !in_comment_brace && !in_comment_semicolon)
+  {
+   NextChar(); // load the char after '[' into CurrChar (handles refill/context)
+   Token = TOK_TagOpen;
+   return;
+  }
+
+  //
+  // Fetch the next character directly from the buffer
+  //
+  if (ReadPos >= ReadLen)
+  {
+   if (pistr)
+   {
+    pistr->read(ReadBuffer, ReadBufferSize);
+    ReadLen = int(pistr->gcount());
+   }
+   else
+    ReadLen = 0;
+   ReadPos = 0;
+   if (ReadLen == 0)
+    break;
+  }
+  c = (unsigned char)ReadBuffer[ReadPos++];
+ }
+
+ CurrChar = EOF;
+ Token = TOK_EOF;
 }

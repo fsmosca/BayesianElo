@@ -15,28 +15,7 @@
 #include <string>
 #include <iostream>
 
-/////////////////////////////////////////////////////////////////////////////
-// Skip a game
-/////////////////////////////////////////////////////////////////////////////
-static void SkipGame(CPGNLex &pgnlex)
-{
- int Token = pgnlex.GetToken();
 
- while (Token != CPGNLex::TOK_EOF)
- {
-  int TokenPrev = Token;
-  Token = pgnlex.ReadNextToken(); 
-
-  if (TokenPrev == CPGNLex::TOK_GameTermination ||
-      Token == CPGNLex::TOK_EOF ||
-      (TokenPrev != CPGNLex::TOK_TagClose &&
-       TokenPrev != CPGNLex::TOK_BOF &&
-       Token == CPGNLex::TOK_TagOpen))
-   return;
- }
-
- return;
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // Read all data for Elo calculation
@@ -66,7 +45,7 @@ void EloDataFromFile(CPGNLex &pgnlex,
  {
   CSTR str;
   int fTheEnd = CPGN::ReadSTR(str, pgnlex);
-  SkipGame(pgnlex);
+  pgnlex.SkipGame();
   
   if (!fTheEnd)
   {
@@ -81,25 +60,29 @@ void EloDataFromFile(CPGNLex &pgnlex,
     std::string sWhite(str.GetWhite());
     std::string sBlack(str.GetBlack());
 
+    int WhitePlayer;
     {
-     std::pair<const std::string, int> Pair(sWhite, Players);
-     if (NameMap.insert(Pair).second)
+     std::pair<std::map<std::string, int>::iterator, bool> res = 
+      NameMap.insert(std::pair<const std::string, int>(sWhite, Players));
+     if (res.second)
      {
       Players++;
       vNames.push_back(sWhite);
      }
+     WhitePlayer = res.first->second;
     }
+
+    int BlackPlayer;
     {
-     std::pair<const std::string, int> Pair(sBlack, Players);
-     if (NameMap.insert(Pair).second)
+     std::pair<std::map<std::string, int>::iterator, bool> res = 
+      NameMap.insert(std::pair<const std::string, int>(sBlack, Players));
+     if (res.second)
      {
       Players++;
       vNames.push_back(sBlack);
      }
+     BlackPlayer = res.first->second;
     }
-
-    int WhitePlayer = NameMap.find(sWhite)->second;
-    int BlackPlayer = NameMap.find(sBlack)->second;
 
     rs.Append(WhitePlayer, BlackPlayer, r);
    }
