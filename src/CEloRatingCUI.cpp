@@ -879,8 +879,10 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
 
   case IDC_Covariance: /////////////////////////////////////////////////////
   {
+   CClockTimer timer;
    bt.ComputeCovariance();
    bt.ComputeLikelihoodOfSuperiority();
+   out << timer.GetInterval() << '\n';
 
    const CMatrix &mCovariance = bt.GetCovariance();
    CCDistribution cdist(1000, -10, 10);

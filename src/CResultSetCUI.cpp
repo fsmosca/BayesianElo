@@ -13,6 +13,9 @@
 #include "pgnlex.h"
 #include "pgn.h"
 #include "debug.h"
+#include "clktimer.h"
+#include "chtime.h"
+#include "CTimeIO.h"
 
 #include <iostream>
 #include <iomanip>
@@ -297,9 +300,11 @@ int CResultSetCUI::ProcessCommand(const char *pszCommand,
 
   case IDC_ReadPGN: ////////////////////////////////////////////////////////
   {
+   CClockTimer timer;
    std::ifstream ifs(pszParameters);
    CPGNLex pgnlex(ifs);
    EloDataFromFile(pgnlex, rs, vecName);
+   out << timer.GetInterval() << '\n';
   }
   break;
 
