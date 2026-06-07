@@ -241,8 +241,8 @@ int CPredictionCUI::ProcessCommand(const char *pszCommand,
    //
    // Arrays to receive cumulative information
    //
-   std::vector<int> vTotalScore(Players);
-   std::vector<int> vTotalVariance(Players);
+   std::vector<long long> vTotalScore(Players);
+   std::vector<long long> vTotalVariance(Players);
    std::vector<int> vTotalRank(Players);
    for (int i = Players; --i >= 0;)
    {
@@ -302,7 +302,8 @@ int CPredictionCUI::ProcessCommand(const char *pszCommand,
     for (int Player = Players; --Player >= 0;)
     {
      vTotalScore[Player] += vLocalScore[Player];
-     vTotalVariance[Player] += vLocalScore[Player] * vLocalScore[Player];
+     vTotalVariance[Player] += (long long)vLocalScore[Player] *
+                               vLocalScore[Player];
      vTotalRank[vPermutation[Player]] += Player;
      vRankDistribution[Player + Players * vPermutation[Player]]++;
     }
@@ -321,7 +322,7 @@ int CPredictionCUI::ProcessCommand(const char *pszCommand,
    //
    std::sort(vPermutation.begin(),
              vPermutation.end(),
-             CIndirectCompare<int>(&vTotalScore[0]));
+             CIndirectCompare<long long>(&vTotalScore[0]));
 
    //
    // Print summary of simulations
