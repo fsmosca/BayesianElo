@@ -525,31 +525,56 @@ void CBradleyTerry::ComputeCovariance()
  lud.Decompose(mTruncatedHessian, &vIndex[0]);
 
  //
- // Fill A
+ // Invert the Hessian (M = H^-1), one solve per identity column.
+ // The covariance A H^-1 A^T is then the double-centered M, which avoids
+ // the O(N^3) matrix product (Phase 1). Result is mathematically identical.
  //
- CMatrix mA(crs.GetPlayers(), crs.GetPlayers() - 1);
+ const int n = crs.GetPlayers() - 1;
+ const int N = crs.GetPlayers();
+
+ CMatrix mM(n, n);
  {
-  double x = -1.0 / crs.GetPlayers();
-  for (int i = crs.GetPlayers() * (crs.GetPlayers() - 1); --i >= 0;)
-   mA[i] = x;
-  for (int i = crs.GetPlayers() - 1; --i >= 0;)
-   mA.SetElement(i, i, 1.0 + x);
+  std::vector<double> e(n), col(n);
+  for (int c = 0; c < n; c++)
+  {
+   for (int k = 0; k < n; k++)
+    e[k] = (k == c) ? 1.0 : 0.0;
+   lud.Solve(mTruncatedHessian, &vIndex[0], &e[0], &col[0]);
+   for (int k = 0; k < n; k++)
+    mM.SetElement(k, c, col[k]);
+  }
  }
 
  //
- // Compute AC
+ // Row sums R_i and grand total T of M
  //
- CMatrix mAC(crs.GetPlayers(), crs.GetPlayers() - 1);
- for (int i = crs.GetPlayers(); --i >= 0;)
+ std::vector<double> R(n);
+ double T = 0;
+ for (int i = 0; i < n; i++)
  {
-  int Index = i * (crs.GetPlayers() - 1);
-  lud.Solve(mTruncatedHessian, &vIndex[0], mA + Index, mAC + Index);
+  double s = 0;
+  for (int k = 0; k < n; k++)
+   s += mM.GetElement(i, k);
+  R[i] = s;
+  T += s;
  }
 
  //
- // Compute the covariance
+ // Cov[i][j] = M[i][j] - R_i/N - R_j/N + T/N^2 (last row/col from the gauge)
  //
- mCovariance.SetProductByTranspose(mAC, mA);
+ mCovariance.SetSize(N, N);
+ const double invN = 1.0 / N;
+ const double TN2 = T * invN * invN;
+ for (int i = 0; i < n; i++)
+ {
+  for (int j = 0; j < n; j++)
+   mCovariance.SetElement(i, j,
+    mM.GetElement(i, j) - R[i] * invN - R[j] * invN + TN2);
+  double v = -R[i] * invN + TN2;
+  mCovariance.SetElement(i, N - 1, v);
+  mCovariance.SetElement(N - 1, i, v);
+ }
+ mCovariance.SetElement(N - 1, N - 1, TN2);
 }
 
 /////////////////////////////////////////////////////////////////////////////
