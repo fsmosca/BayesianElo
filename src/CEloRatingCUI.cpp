@@ -595,6 +595,7 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
    CCondensedResults crsNoPrior(rs);
 
    std::ios::fmtflags f = out.flags();
+   std::streamsize prec = out.precision();
    out.setf(std::ios::right, std::ios::adjustfield);
    out << std::setw(3) << "Rank" << ' ';
    out.setf(std::ios::left, std::ios::adjustfield);
@@ -653,6 +654,7 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
    }
 
    out.flags(f);
+   out.precision(prec);
   }
   break;
 
