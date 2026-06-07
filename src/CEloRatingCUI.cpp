@@ -602,8 +602,8 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
    out << std::setw(Width) << "Name" << ' ';
    out.setf(std::ios::right, std::ios::adjustfield);
    out << std::setw(5) << "Elo" << ' ';
-   out << std::setw(4) << "  +" << ' ';
-   out << std::setw(4) << "  -" << ' ';
+   out << std::setw(5) << "  +" << ' ';
+   out << std::setw(5) << "  -" << ' ';
    out << std::setw(6) << "games" << ' ';
    out << std::setw(6) << "score" << ' ';
    out << std::setw(5) << "oppo." << ' ';
@@ -635,8 +635,8 @@ int CEloRatingCUI::ProcessCommand(const char *pszCommand,
      out << std::setw(Width) << vecName[j] << ' ';
      out.setf(std::ios::right, std::ios::adjustfield);
      out << std::setw(5) << RoundDouble(EloScale * bt.GetElo(j) + eloOffset) << ' ';
-     out << std::setw(4) << RoundDouble(EloScale * veloUpper[j]) << ' ';
-     out << std::setw(4) << RoundDouble(EloScale * veloLower[j]) << ' ';
+     out << std::setw(5) << RoundDouble(EloScale * veloUpper[j]) << ' ';
+     out << std::setw(5) << RoundDouble(EloScale * veloLower[j]) << ' ';
      out << std::setw(6) << RoundDouble(Games) << ' ';
 
      out.setf(std::ios::fixed, std::ios::floatfield);
