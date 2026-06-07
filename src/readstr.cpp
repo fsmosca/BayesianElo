@@ -47,5 +47,11 @@ int ReadString(istream &is, char *pszBuffer, int Size)
    pszBuffer[i] = c;
  }
 
+ //
+ // Buffer filled without reaching a newline: terminate to keep the result a
+ // valid C-string (the caller treats it as one). The overlong line is
+ // truncated rather than left unterminated, which would over-read.
+ //
+ pszBuffer[Size - 1] = 0;
  return i;
 }
