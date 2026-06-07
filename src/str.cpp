@@ -11,17 +11,19 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 #include <cstring>
+#include <cstdio>
 
 #include "debug.h"
 #include "str.h"
 
 ////////////////////////////////////////////////////////////////////////////
 // Safe copy of a string to another string with limited size
+// snprintf always NUL-terminates and truncates cleanly (the truncation here
+// is intentional, sized to the fixed STR fields).
 ////////////////////////////////////////////////////////////////////////////
 static void SafeCopy(char *pszDest, const char *pszOrig, int Size)
 {
- strncpy(pszDest, pszOrig, Size);
- pszDest[Size - 1] = 0;
+ std::snprintf(pszDest, Size, "%s", pszOrig);
 }
 
 ////////////////////////////////////////////////////////////////////////////
