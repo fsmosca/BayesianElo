@@ -260,6 +260,52 @@ double CBradleyTerry::LogLikelihood(int Player) const
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// Get the likelihood of the results of a player (optimized)
+/////////////////////////////////////////////////////////////////////////////
+double CBradleyTerry::LogLikelihood(int Player, double V_p, double Delta, double K1, double K2, const std::vector<double> &E_velo_inv) const
+{
+ double Result = 0;
+ const double C = 0.00575646273248511421;
+ double E_A = std::exp((V_p + Delta) * C);
+
+ for (int i = crs.GetOpponents(Player); --i >= 0;)
+ {
+  const CCondensedResult &cr = crs.GetCondensedResult(Player, i);
+  double E_diff = E_A * E_velo_inv[i];
+  double inv_E_diff = 1.0 / E_diff;
+
+  double w_prob = 1.0 / (1.0 + K1 * inv_E_diff);
+  double l_prob = 1.0 / (1.0 + E_diff * K2);
+  
+  double w_prob_minus = 1.0 / (1.0 + E_diff * K1);
+  double l_prob_minus = 1.0 / (1.0 + K2 * inv_E_diff);
+
+  if (cr.w_ij > 0)
+   Result += cr.w_ij * std::log(w_prob);
+  if (cr.d_ij > 0)
+  {
+   double d_prob = 1.0 - w_prob - l_prob;
+   if (d_prob < 1e-15) d_prob = 1e-15;
+   Result += cr.d_ij * std::log(d_prob);
+  }
+  if (cr.l_ij > 0)
+   Result += cr.l_ij * std::log(l_prob);
+
+  if (cr.w_ji > 0)
+   Result += cr.w_ji * std::log(w_prob_minus);
+  if (cr.d_ji > 0)
+  {
+   double d_prob_minus = 1.0 - w_prob_minus - l_prob_minus;
+   if (d_prob_minus < 1e-15) d_prob_minus = 1e-15;
+   Result += cr.d_ji * std::log(d_prob_minus);
+  }
+  if (cr.l_ji > 0)
+   Result += cr.l_ji * std::log(l_prob_minus);
+ }
+ return Result;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // Get the likelihood of a result set
 /////////////////////////////////////////////////////////////////////////////
 double CBradleyTerry::LogLikelihood(const CResultSet &rs) const
@@ -307,23 +353,34 @@ double CBradleyTerry::LogLikelihood() const
 /////////////////////////////////////////////////////////////////////////////
 void CBradleyTerry::GetPlayerDist(int Player, CCDistribution &cdist) const
 {
- std::vector<double> veloBackup(velo);
+ double V_p_backup = velo[Player];
+ int numPlayers = crs.GetPlayers();
+
+ const double C = 0.00575646273248511421;
+ double E_adv = std::exp(eloAdvantage * C);
+ double E_draw = std::exp(eloDraw * C);
+ double K1 = E_draw / E_adv;
+ double K2 = E_adv * E_draw;
+
+ // Precompute E_velo_inv for all opponents of this player
+ std::vector<double> E_velo_inv(crs.GetOpponents(Player));
+ for (int i = crs.GetOpponents(Player); --i >= 0;)
+ {
+  const CCondensedResult &cr = crs.GetCondensedResult(Player, i);
+  E_velo_inv[i] = std::exp(-velo[cr.Opponent] * C);
+ }
 
  for (int i = cdist.GetSize(); --i >= 0;)
  {
-  velo[Player] = cdist.ValueFromIndex(i);
-  if (crs.GetPlayers() > 1)
+  double V_p = cdist.ValueFromIndex(i);
+  double Delta = 0;
+  if (numPlayers > 1)
   {
-   double Delta = (velo[Player] - veloBackup[Player]) / (crs.GetPlayers() - 1);
-   for (int j = crs.GetPlayers(); --j >= 0;)
-    if (j != Player)
-     velo[j] = veloBackup[j] - Delta;
+   Delta = (V_p - V_p_backup) / (numPlayers - 1);
   }
-  cdist.SetProbability(i, LogLikelihood(Player));
+  cdist.SetProbability(i, LogLikelihood(Player, V_p, Delta, K1, K2, E_velo_inv));
  }
  cdist.LogNormalize(); 
-
- velo = veloBackup;
 }
 
 /////////////////////////////////////////////////////////////////////////////

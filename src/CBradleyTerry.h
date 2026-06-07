@@ -116,6 +116,7 @@ class CBradleyTerry // bt
   // Likelihood of results
   //
   double LogLikelihood(int Player) const;
+  double LogLikelihood(int Player, double V_p, double Delta, double K1, double K2, const std::vector<double> &E_velo_inv) const;
   double LogLikelihood() const;
   double LogLikelihood(const CResultSet &rs) const;
 
